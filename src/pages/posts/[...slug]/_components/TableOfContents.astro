@@ -1,0 +1,102 @@
+---
+import type { MarkdownHeading } from "astro";
+import { useTranslations } from "@/i18n";
+
+type Props = {
+  headings: MarkdownHeading[];
+  variant: "mobile" | "desktop";
+};
+
+const { headings, variant } = Astro.props;
+const t = useTranslations(Astro.currentLocale);
+const visibleHeadings = headings.filter(
+  ({ depth }) => depth === 2 || depth === 3
+);
+---
+
+{
+  visibleHeadings.length > 0 && variant === "mobile" && (
+    <details
+      data-pagefind-ignore
+      class="border-border bg-muted/30 mb-8 block rounded-lg border p-4 xl:hidden"
+    >
+      <summary class="font-semibold">{t.post.tableOfContents}</summary>
+      <ol class="mt-4 space-y-2 text-sm">
+        {visibleHeadings.map(({ depth, slug, text }) => (
+          <li class:list={{ "ps-4": depth === 3 }}>
+            <a class="toc-link hover:text-accent" href={`#${slug}`}>
+              {text}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </details>
+  )
+}
+
+{
+  visibleHeadings.length > 0 && variant === "desktop" && (
+    <aside
+      data-pagefind-ignore
+      class="relative start-6 hidden w-40 xl:block 2xl:start-8 2xl:w-56"
+    >
+      <nav class="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
+        <p class="border-border mb-4 border-b pb-3 text-sm font-semibold">
+          {t.post.tableOfContents}
+        </p>
+        <ol class="space-y-2 text-sm">
+          {visibleHeadings.map(({ depth, slug, text }) => (
+            <li class:list={{ "ps-4": depth === 3 }}>
+              <a
+                class="toc-link text-muted-foreground hover:text-accent block border-s-2 border-transparent ps-3 leading-5"
+                href={`#${slug}`}
+                data-toc-slug={slug}
+              >
+                {text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </aside>
+  )
+}
+
+<script>
+  function initTableOfContents() {
+    const links = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>("[data-toc-slug]")
+    );
+    if (links.length === 0) return;
+
+    const headings = links
+      .map(link => document.getElementById(link.dataset.tocSlug ?? ""))
+      .filter((heading): heading is HTMLElement => Boolean(heading));
+
+    const setActive = (id: string) => {
+      links.forEach(link => {
+        const active = link.dataset.tocSlug === id;
+        link.classList.toggle("border-accent", active);
+        link.classList.toggle("text-accent", active);
+        link.classList.toggle("font-medium", active);
+        link.setAttribute("aria-current", active ? "location" : "false");
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      entries => {
+        const visible = entries
+          .filter(entry => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]?.target.id) setActive(visible[0].target.id);
+      },
+      { rootMargin: "-15% 0px -70% 0px" }
+    );
+
+    headings.forEach(heading => observer.observe(heading));
+    setActive(headings[0]?.id ?? "");
+  }
+
+  initTableOfContents();
+  document.addEventListener("astro:after-swap", initTableOfContents);
+</script>

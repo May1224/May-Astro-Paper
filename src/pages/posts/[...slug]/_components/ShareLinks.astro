@@ -1,5 +1,6 @@
 ---
 import LinkButton from "@/components/LinkButton.astro";
+import IconCopy from "@/assets/icons/IconCopy.svg";
 import { tplStr, useTranslations } from "@/i18n";
 import config from "@/config";
 
@@ -10,7 +11,7 @@ const icons = import.meta.glob<{
   default: (_props: Record<string, unknown>) => unknown;
 }>("/src/assets/icons/socials/*.svg");
 
-const pageUrl = Astro.url;
+const pageUrl = Astro.url.href;
 
 const platformLabel = (name: string) =>
   name.charAt(0).toUpperCase() + name.slice(1);
@@ -30,15 +31,25 @@ const items = await Promise.all(
 ---
 
 {
-  items.some(({ Icon }) => Icon) && (
+  (
     <div class="flex flex-none flex-col items-center justify-center gap-1 md:items-start">
       <span class="italic">{t.post.sharePostIntro}</span>
-      <div class="text-center">
+      <div class="flex items-center gap-1 text-center">
+        <button
+          type="button"
+          class="copy-link group hover:text-accent inline-flex items-center gap-2 p-2 text-sm sm:p-1"
+          data-label={t.post.copyLink}
+          data-copied-label={t.post.copiedLink}
+          title={t.post.copyLink}
+        >
+          <IconCopy class="size-5" />
+          <span aria-live="polite">{t.post.copyLink}</span>
+        </button>
         {items.map(({ url, title, Icon }) =>
           Icon ? (
             <LinkButton
-              href={`${url}${pageUrl}`}
-              class="scale-90 p-2 hover:rotate-6 sm:p-1"
+              href={`${url}${encodeURIComponent(pageUrl)}`}
+              class="p-2 sm:p-1"
               title={title}
               target="_blank"
               rel="noopener noreferrer"
@@ -52,3 +63,27 @@ const items = await Promise.all(
     </div>
   )
 }
+
+<script>
+  function initCopyLink() {
+    document
+      .querySelectorAll<HTMLButtonElement>(".copy-link")
+      .forEach(button => {
+        if (button.dataset.ready === "true") return;
+        button.dataset.ready = "true";
+
+        button.addEventListener("click", async () => {
+          await navigator.clipboard.writeText(window.location.href);
+          const label = button.querySelector("span");
+          if (!label) return;
+          label.textContent = button.dataset.copiedLabel ?? "链接已复制";
+          window.setTimeout(() => {
+            label.textContent = button.dataset.label ?? "复制链接";
+          }, 1600);
+        });
+      });
+  }
+
+  initCopyLink();
+  document.addEventListener("astro:after-swap", initCopyLink);
+</script>

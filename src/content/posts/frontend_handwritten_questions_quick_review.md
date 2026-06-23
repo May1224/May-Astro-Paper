@@ -1,15 +1,32 @@
 ---
-author: AstroPaper
+author: AstroMay
 pubDatetime: 2026-06-22T21:30:00+08:00
-title: 前端复习
+modDatetime: 2026-06-23T11:40:00+08:00
+title: "前端高频手写题速查：32 道 JavaScript 核心练习"
+featured: true
 tags:
-  - 学习
-description: 前端高频手写题、Promise、事件、缓存和常见算法的快速复习。
+  - 前端
+  - JavaScript
+  - 面试复习
+cover: ../../assets/images/posts/frontend_handwritten_questions_quick_review/cover.webp
+coverAlt: 由代码、数据结构、异步流程和算法模块组成的前端复习工作台插画
+description: 汇总函数、Promise、事件、缓存、DOM 与常见算法的 32 道前端手写题，适合面试前快速复习。
 ---
 
-# 一、函数与对象手写
+这份速查表覆盖前端面试中常见的函数实现、数据处理、异步控制、事件系统、缓存和基础算法。重点不是背下完整代码，而是能够说明核心思路、边界条件和复杂度。
 
-## 1. 手写 `call`
+## 使用建议
+
+1. 先遮住答案，独立写出核心流程。
+2. 对照实现检查空值、异常、重复调用和执行顺序。
+3. 用一句话解释方案，确认不是只会默写。
+4. 对薄弱题目建立最小测试用例并实际运行。
+
+文中的实现以复习核心原理为目标。用于生产环境时，还需要结合浏览器兼容性、类型约束和项目规范进一步完善。
+
+## 一、函数与对象手写
+
+### 1. 手写 `call`
 
 **考点：** 改变 `this` 指向、隐式绑定、Symbol 防止属性冲突。
 
@@ -36,7 +53,7 @@ Function.prototype.myCall = function (context, ...args) {
 - `null/undefined` 怎么处理？非严格模式下指向全局对象，这里用 `globalThis`。
 - 基本类型 context 怎么办？用 `Object(context)` 包装。
 
-## 2. 手写 `apply`
+### 2. 手写 `apply`
 
 **考点：** 和 call 的区别、数组参数。
 
@@ -63,7 +80,7 @@ Function.prototype.myApply = function (context, args) {
 - `args` 为空怎么办？直接无参调用。
 - apply 常见用途？把数组展开传给函数。
 
-## 3. 手写 `bind`
+### 3. 手写 `bind`
 
 **考点：** 返回函数、预置参数、new 调用优先级。
 
@@ -93,7 +110,7 @@ Function.prototype.myBind = function (context, ...presetArgs) {
 - 为什么处理 new？原生 bind 返回函数可作为构造函数。
 - 箭头函数 bind 有用吗？不能改变箭头函数 this，但可预置参数。
 
-## 4. 手写 `new`
+### 4. 手写 `new`
 
 **考点：** 原型链、构造函数返回值。
 
@@ -121,7 +138,7 @@ function myNew(Constructor, ...args) {
 - 返回对象怎么办？返回该对象。
 - `Object.create` 做什么？创建一个指定原型的新对象。
 
-## 5. 手写 `instanceof`
+### 5. 手写 `instanceof`
 
 **考点：** 原型链查找。
 
@@ -151,7 +168,7 @@ function myInstanceof(obj, Constructor) {
 - 原型链终点是什么？`null`。
 - 跨 iframe 判断数组为什么可能失败？不同 iframe 有不同的 Array 构造函数。
 
-## 6. 手写深拷贝
+### 6. 手写深拷贝
 
 **考点：** 递归、循环引用、数组/对象/Date/RegExp。
 
@@ -183,7 +200,7 @@ function deepClone(value, cache = new WeakMap()) {
 - 为什么用 WeakMap？键是弱引用，不影响垃圾回收。
 - Map/Set 怎么处理？面试基础版可说明需额外遍历 entries。
 
-## 7. 手写对象扁平化
+### 7. 手写对象扁平化
 
 **考点：** 递归、路径拼接。
 
@@ -214,9 +231,9 @@ flattenObject({ a: { b: 1 }, c: 2 }); // { 'a.b': 1, c: 2 }
 - 循环引用怎么办？加 WeakSet 记录访问过的对象。
 - null 为什么单独判断？`typeof null` 是 object。
 
-# 二、数组、字符串与数据处理
+## 二、数组、字符串与数据处理
 
-## 8. 数组去重
+### 8. 数组去重
 
 **考点：** Set、哈希。
 
@@ -244,7 +261,7 @@ function uniqueBy(arr, key) {
 }
 ```
 
-## 9. 数组扁平化
+### 9. 数组扁平化
 
 **考点：** 递归、深度控制。
 
@@ -271,7 +288,7 @@ function flatten(arr, depth = Infinity) {
 - 递归太深怎么办？可用栈迭代实现。
 - 会改变原数组吗？这个实现不会。
 
-## 10. 数组分组 `groupBy`
+### 10. 数组分组 `groupBy`
 
 **考点：** reduce、对象/Map 聚合。
 
@@ -294,7 +311,7 @@ function groupBy(arr, getKey) {
 - 时间复杂度？O(n)。
 - 结果要保持顺序吗？数组内顺序保持原遍历顺序。
 
-## 11. 字符串模板解析
+### 11. 字符串模板解析
 
 **考点：** 正则、路径取值。
 
@@ -316,7 +333,7 @@ renderTemplate("hello {{ user.name }}", { user: { name: "Tom" } }); // hello Tom
 - 支持表达式吗？不建议直接 eval，有安全风险。
 - 可选链有什么作用？避免路径中间为 null/undefined 报错。
 
-## 12. 千分位格式化
+### 12. 千分位格式化
 
 **考点：** 正则或字符串处理。
 
@@ -336,7 +353,7 @@ function formatThousands(num) {
 - 小数怎么办？整数部分格式化，小数部分保留。
 - 原生 API？`Number(num).toLocaleString()`。
 
-## 13. 版本号比较
+### 13. 版本号比较
 
 **考点：** 字符串拆分、逐段比较。
 
@@ -365,9 +382,9 @@ function compareVersion(v1, v2) {
 - 包含 beta 怎么办？需要扩展语义化版本规则。
 - 时间复杂度？O(n)，n 是版本段数。
 
-# 三、异步与 Promise 手写
+## 三、异步与 Promise 手写
 
-## 14. 手写防抖 debounce
+### 14. 手写防抖 debounce
 
 **考点：** 定时器、this、参数。
 
@@ -392,7 +409,7 @@ function debounce(fn, delay = 300) {
 - 为什么用 apply？保留原函数 this 和参数。
 - 怎么加立即执行？第一次触发先执行，等待期内不再执行。
 
-## 15. 手写节流 throttle
+### 15. 手写节流 throttle
 
 **考点：** 控制执行频率。
 
@@ -418,7 +435,7 @@ function throttle(fn, delay = 300) {
 - 时间戳版特点？通常立即执行第一次。
 - 定时器版特点？可保证尾部再执行一次。
 
-## 16. 手写 Promise.all
+### 16. 手写 Promise.all
 
 **考点：** 并发、顺序、失败快速返回。
 
@@ -453,7 +470,7 @@ function promiseAll(promises) {
 - 普通值怎么办？用 `Promise.resolve` 包装。
 - 结果顺序按完成顺序吗？不是，按输入顺序。
 
-## 17. 手写 Promise.race
+### 17. 手写 Promise.race
 
 **考点：** 第一个 settle。
 
@@ -475,7 +492,7 @@ function promiseRace(promises) {
 - 空数组会怎样？永远 pending。
 - race 只看成功吗？不是，成功失败谁先 settle 都算。
 
-## 18. 请求超时封装
+### 18. 请求超时封装
 
 **考点：** Promise.race、AbortController。
 
@@ -501,7 +518,7 @@ function fetchWithTimeout(url, options = {}, timeout = 5000) {
 - axios 怎么取消？新版支持 AbortController。
 - 超时错误怎么识别？捕获 AbortError 或统一包装错误。
 
-## 19. 并发请求控制
+### 19. 并发请求控制
 
 **考点：** 队列、并发池。
 
@@ -547,7 +564,7 @@ function limitRequest(tasks, limit) {
 - 失败后继续还是中断？看需求；这个实现失败即 reject。
 - 应用场景？图片上传、批量接口、爬取资源。
 
-## 20. 实现 sleep
+### 20. 实现 sleep
 
 **考点：** Promise、定时器。
 
@@ -570,9 +587,9 @@ async function demo() {
 - setTimeout 精确吗？不精确，会受主线程阻塞和浏览器调度影响。
 - 用途？轮询间隔、动画步骤、重试退避。
 
-# 四、事件、发布订阅与缓存
+## 四、事件、发布订阅与缓存
 
-## 21. 手写发布订阅 EventEmitter
+### 21. 手写发布订阅 EventEmitter
 
 **考点：** 事件中心、on/off/once/emit。
 
@@ -613,7 +630,7 @@ class EventEmitter {
 - emit 时 off 会不会影响遍历？严谨版可先复制一份 handlers。
 - 发布订阅和观察者区别？发布订阅有事件中心解耦，观察者通常直接持有订阅者。
 
-## 22. 手写 LRU 缓存
+### 22. 手写 LRU 缓存
 
 **考点：** Map 插入顺序、最近使用淘汰。
 
@@ -652,7 +669,7 @@ class LRUCache {
 - 大厂更严格实现？哈希表 + 双向链表。
 - Map 版本有什么限制？依赖 JS Map 顺序，面试基础够用。
 
-## 23. 手写 once 函数
+### 23. 手写 once 函数
 
 **考点：** 闭包、结果缓存。
 
@@ -679,7 +696,7 @@ function once(fn) {
 - 适用场景？初始化 SDK、只绑定一次事件、提交防重复。
 - 如果第一次执行报错还算 called 吗？看需求，可把 called 放在成功后设置。
 
-## 24. 手写 memoize
+### 24. 手写 memoize
 
 **考点：** 缓存、参数 key。
 
@@ -706,9 +723,9 @@ function memoize(fn, resolver = (...args) => JSON.stringify(args)) {
 - 缓存会无限增长吗？会，生产可结合 LRU。
 - 异步函数能缓存吗？可以缓存 Promise，但要处理失败是否删除缓存。
 
-# 五、DOM、场景与算法高频
+## 五、DOM、场景与算法高频
 
-## 25. 手写事件委托
+### 25. 手写事件委托
 
 **考点：** 冒泡、target、matches。
 
@@ -736,7 +753,7 @@ function delegate(parent, selector, type, handler) {
 - `target` 和 `currentTarget` 区别？target 是实际触发元素，currentTarget 是绑定监听器元素。
 - 为什么 while 向上找？点击的可能是目标元素内部子节点。
 
-## 26. 实现图片懒加载
+### 26. 实现图片懒加载
 
 **考点：** IntersectionObserver。
 
@@ -767,7 +784,7 @@ function lazyLoadImages() {
 - 首屏图要懒加载吗？不建议，会影响 LCP。
 - 兼容旧浏览器怎么办？滚动监听 + 节流 + getBoundingClientRect。
 
-## 27. 实现红绿灯
+### 27. 实现红绿灯
 
 **考点：** async/await、循环。
 
@@ -796,7 +813,7 @@ async function trafficLight() {
 - setTimeout 精确吗？不精确，受主线程影响。
 - Promise 链怎么写？每一步 then 返回下一个 sleep。
 
-## 28. 手写简版响应式
+### 28. 手写简版响应式
 
 **考点：** Proxy、依赖收集、派发更新。
 
@@ -851,7 +868,7 @@ function reactive(obj) {
 - 这个版本缺什么？嵌套响应式、调度器、清理依赖、数组/集合特殊处理。
 - Vue3 对基本类型怎么响应式？用 ref 包一层 value。
 
-## 29. 手写虚拟 DOM 转真实 DOM
+### 29. 手写虚拟 DOM 转真实 DOM
 
 **考点：** 递归、DOM API。
 
@@ -887,7 +904,7 @@ function render(vnode) {
 - className 怎么处理？真实项目要映射到 class。
 - children 是字符串怎么办？创建文本节点。
 
-## 30. 两数之和
+### 30. 两数之和
 
 **考点：** 哈希表。
 
@@ -915,7 +932,7 @@ function twoSum(nums, target) {
 - 有重复数字怎么办？Map 可覆盖，但找到答案前不影响。
 - 返回值是下标还是数字？按题目要求。
 
-## 31. 最长无重复子串
+### 31. 最长无重复子串
 
 **考点：** 滑动窗口、哈希表。
 
@@ -948,7 +965,7 @@ function lengthOfLongestSubstring(s) {
 - 返回子串怎么改？记录最大长度时同步记录起点。
 - 中文字符怎么办？简单字符串索引按 UTF-16，严格场景用 Array.from。
 
-## 32. 有效括号
+### 32. 有效括号
 
 **考点：** 栈。
 
@@ -983,7 +1000,7 @@ function isValidBrackets(s) {
 - 空字符串合法吗？通常合法。
 - 包含其他字符怎么办？按题目要求忽略或返回 false。
 
-# 高频背诵清单
+## 高频背诵清单
 
 1. 改 this：call/apply 临时挂对象，bind 返回新函数。
 2. 原型链：new 创建对象并连接 prototype，instanceof 沿原型链查找。

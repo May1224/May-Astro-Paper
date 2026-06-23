@@ -21,6 +21,11 @@ export default {
     editPage: "Edit page",
     previousPost: "Previous Post",
     nextPost: "Next Post",
+    readingTime: "{{minutes}} min read",
+    tableOfContents: "Table of contents",
+    relatedPosts: "Related posts",
+    copyLink: "Copy link",
+    copiedLink: "Link copied",
   },
   pagination: {
     prev: "Prev",
@@ -32,6 +37,7 @@ export default {
     featured: "Featured",
     recentPosts: "Recent Posts",
     allPosts: "All Posts",
+    browseTags: "Browse by tag",
   },
   footer: {
     copyright: "Copyright",

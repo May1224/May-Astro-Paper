@@ -1,5 +1,6 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
+import { Image } from "astro:assets";
 import PostLayout from "@/layouts/PostLayout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -14,6 +15,11 @@ import ShareLinks from "./_components/ShareLinks.astro";
 import BackButton from "./_components/BackButton.astro";
 import BackToTopButton from "./_components/BackToTopButton.astro";
 import AdjacentPostNav from "./_components/AdjacentPostNav.astro";
+import TableOfContents from "./_components/TableOfContents.astro";
+import RelatedPosts from "./_components/RelatedPosts.astro";
+import { getRelatedPosts as findRelatedPosts } from "@/utils/getRelatedPosts";
+import { getReadingTime } from "@/utils/getReadingTime";
+import { tplStr, useTranslations } from "@/i18n";
 import config from "@/config";
 
 export async function getStaticPaths() {
@@ -24,6 +30,7 @@ export async function getStaticPaths() {
     params: { slug: getPostSlug(post.id, post.filePath) },
     props: {
       post,
+      relatedPosts: findRelatedPosts(post, sortedPosts),
       prevPost:
         index > 0
           ? {
@@ -52,16 +59,20 @@ type AdjacentPost = {
 
 type Props = {
   post: CollectionEntry<"posts">;
+  relatedPosts: CollectionEntry<"posts">[];
   prevPost: AdjacentPost;
   nextPost: AdjacentPost;
 };
 
-const { post, prevPost, nextPost } = Astro.props;
+const { post, relatedPosts, prevPost, nextPost } = Astro.props;
 const locale = Astro.currentLocale ?? config.site.lang;
+const t = useTranslations(locale);
 
 const {
   title,
   description,
+  cover,
+  coverAlt,
   ogImage: initOgImage,
   canonicalURL,
   pubDatetime,
@@ -71,7 +82,8 @@ const {
   hideEditPost,
 } = post.data;
 
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const { minutes } = getReadingTime(post.body ?? "");
 
 let ogImageUrl: string | undefined;
 
@@ -79,6 +91,10 @@ if (typeof initOgImage === "string") {
   ogImageUrl = initOgImage;
 } else if (initOgImage?.src) {
   ogImageUrl = initOgImage.src;
+}
+
+if (!ogImageUrl && cover?.src) {
+  ogImageUrl = cover.src;
 }
 
 if (!ogImageUrl && config.features.dynamicOgImage) {
@@ -111,53 +127,77 @@ const ogImage = ogImageUrl
     class:list={["app-layout", { "mt-8": !config.features.showBackButton }]}
     data-pagefind-body
   >
-    <h1
-      style={{ viewTransitionName: toTransitionName(title) }}
-      class="text-accent inline-block text-2xl font-bold sm:text-3xl"
-    >
-      {title}
-    </h1>
+    <div class="xl:grid xl:grid-cols-[minmax(0,1fr)_0]">
+      <div class="min-w-0">
+        <h1
+          style={{ viewTransitionName: toTransitionName(title) }}
+          class="text-accent inline-block text-3xl leading-tight font-bold sm:text-4xl"
+        >
+          {title}
+        </h1>
 
-    <div class="my-2 flex items-center gap-2">
-      <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
-      <span
-        aria-hidden="true"
-        class:list={[
-          "text-muted-foreground max-sm:hidden",
-          { hidden: !config.features.editPost?.enabled || hideEditPost },
-        ]}
-      >
-        |
-      </span>
-      <EditPost {hideEditPost} {post} class="max-sm:hidden" />
+        <div
+          class="text-muted-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-2"
+        >
+          <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
+          <span class="text-sm sm:text-base">
+            {tplStr(t.post.readingTime, { minutes })}
+          </span>
+          <EditPost {hideEditPost} {post} class="max-sm:hidden" />
+        </div>
+
+        {
+          cover && (
+            <Image
+              src={cover}
+              alt={coverAlt ?? ""}
+              widths={[720, 960, 1200]}
+              sizes="(min-width: 1024px) 56rem, 100vw"
+              format="webp"
+              loading="eager"
+              fetchpriority="high"
+              data-pagefind-meta="image[src]"
+              class="border-border mt-8 aspect-[40/21] w-full rounded-lg border object-cover"
+            />
+          )
+        }
+
+        <div class="mt-8">
+          <TableOfContents {headings} variant="mobile" />
+        </div>
+
+        <article
+          id="article"
+          class:list={[
+            "app-prose w-full max-w-4xl",
+            "prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)",
+          ]}
+        >
+          <Content />
+        </article>
+
+        <hr class="my-8 border-dashed" />
+
+        <EditPost class="sm:hidden" {hideEditPost} {post} />
+        <BackToTopButton />
+
+        <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
+          {
+            tags.map(tag => (
+              <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />
+            ))
+          }
+        </ul>
+
+        <ShareLinks />
+        <RelatedPosts posts={relatedPosts} />
+
+        <hr class="my-8 border-dashed" />
+        <AdjacentPostNav {prevPost} {nextPost} />
+      </div>
+
+      <TableOfContents {headings} variant="desktop" />
     </div>
-
-    <article
-      id="article"
-      class:list={[
-        "mt-8 w-full",
-        "app-prose max-w-app",
-        "prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)",
-      ]}
-    >
-      <Content />
-    </article>
-
-    <hr class="my-8 border-dashed" />
-
-    <EditPost class="sm:hidden" {hideEditPost} {post} />
-
-    <BackToTopButton />
-
-    <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />)}
-    </ul>
-
-    <ShareLinks />
-
-    <hr class="my-8 border-dashed" />
-
-    <AdjacentPostNav {prevPost} {nextPost} />
   </main>
   <Footer />
 </PostLayout>
@@ -216,7 +256,7 @@ const ogImage = ogImageUrl
   addHeadingLinks();
 
   function attachCopyButtons() {
-    const copyButtonLabel = "Copy";
+    const copyButtonLabel = "复制";
     const codeBlocks = Array.from(document.querySelectorAll("pre"));
 
     for (const codeBlock of codeBlocks) {
@@ -251,7 +291,7 @@ const ogImage = ogImageUrl
 
       await navigator.clipboard.writeText(text ?? "");
 
-      button.innerText = "Copied";
+      button.innerText = "已复制";
 
       setTimeout(() => {
         button.innerText = copyButtonLabel;

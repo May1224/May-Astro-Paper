@@ -9,6 +9,7 @@ import Card from "@/components/Card.astro";
 import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
 import { getSortedPosts } from "@/utils/getSortedPosts";
+import { getUniqueTags } from "@/utils/getUniqueTags";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
 
@@ -18,6 +19,9 @@ export const getStaticPaths = (async ({ paginate }) => {
 }) satisfies GetStaticPaths;
 
 const { page } = Astro.props;
+const allPosts = await getCollection("posts", ({ data }) => !data.draft);
+const publishedPosts = getSortedPosts(allPosts);
+const tagCount = getUniqueTags(publishedPosts).length;
 
 const locale = Astro.currentLocale ?? config.site.lang;
 const t = useTranslations(locale);
@@ -29,6 +33,9 @@ const t = useTranslations(locale);
   <Breadcrumb />
 
   <Main pageTitle={t.pages.postsTitle} pageDesc={t.pages.postsDesc}>
+    <p class="text-muted-foreground mb-6 text-sm">
+      已发布 {publishedPosts.length} 篇文章，覆盖 {tagCount} 个常用标签
+    </p>
     <ul>
       {page.data.map(data => <Card {...data} />)}
     </ul>

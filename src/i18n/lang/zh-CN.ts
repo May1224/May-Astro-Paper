@@ -21,6 +21,11 @@ export default {
     editPage: "编辑页面",
     previousPost: "上一篇",
     nextPost: "下一篇",
+    readingTime: "约 {{minutes}} 分钟阅读",
+    tableOfContents: "文章目录",
+    relatedPosts: "相关文章",
+    copyLink: "复制链接",
+    copiedLink: "链接已复制",
   },
   pagination: {
     prev: "上一页",
@@ -29,13 +34,14 @@ export default {
   },
   home: {
     socialLinks: "社交链接",
-    featured: "精选文章",
-    recentPosts: "最近文章",
+    featured: "精选",
+    recentPosts: "最近",
     allPosts: "全部文章",
+    browseTags: "按标签浏览",
   },
   footer: {
     copyright: "版权",
-    allRightsReserved: "保留所有权利。",
+    allRightsReserved: "保留所有权利",
   },
   pages: {
     tagTitle: "标签",

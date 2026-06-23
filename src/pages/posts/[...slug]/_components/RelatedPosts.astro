@@ -1,0 +1,25 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Card from "@/components/Card.astro";
+import { useTranslations } from "@/i18n";
+
+type Props = {
+  posts: CollectionEntry<"posts">[];
+};
+
+const { posts } = Astro.props;
+const t = useTranslations(Astro.currentLocale);
+---
+
+{
+  posts.length > 0 && (
+    <section data-pagefind-ignore class="mt-10">
+      <h2 class="mb-5 text-xl font-semibold">{t.post.relatedPosts}</h2>
+      <ul>
+        {posts.map(post => (
+          <Card variant="h3" {...post} />
+        ))}
+      </ul>
+    </section>
+  )
+}

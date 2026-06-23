@@ -3,9 +3,9 @@ import { defineAstroPaperConfig } from "./src/types/config";
 export default defineAstroPaperConfig({
   site: {
     url: "https://may1224.github.io/May-Astro-Paper/",
-    title: "AstroPaper",
-    description: "一个用于记录日记、学习资料和技术文章的中文静态博客。",
-    author: "AstroPaper",
+    title: "AstroMay",
+    description: "记录前端学习、工程实践与个人成长的中文技术博客。",
+    author: "AstroMay",
     profile: "",
     ogImage: "default-og.jpg",
     lang: "zh-CN",
@@ -13,7 +13,7 @@ export default defineAstroPaperConfig({
     dir: "ltr",
   },
   posts: {
-    perPage: 4,
+    perPage: 6,
     perIndex: 4,
     scheduledPostMargin: 15 * 60 * 1000,
   },
@@ -29,11 +29,10 @@ export default defineAstroPaperConfig({
   },
   socials: [],
   shareLinks: [
-    { name: "whatsapp", url: "https://wa.me/?text=" },
-    { name: "facebook", url: "https://www.facebook.com/sharer.php?u=" },
-    { name: "x",        url: "https://x.com/intent/post?url=" },
-    { name: "telegram", url: "https://t.me/share/url?url=" },
-    { name: "pinterest", url: "https://pinterest.com/pin/create/button/?url=" },
-    { name: "mail",     url: "mailto:?subject=See%20this%20post&body=" },
+    {
+      name: "mail",
+      url: "mailto:?subject=分享一篇文章&body=",
+      linkTitle: "通过邮件分享",
+    },
   ],
 });

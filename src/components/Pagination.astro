@@ -4,42 +4,79 @@ import type { CollectionEntry } from "astro:content";
 import IconArrowLeft from "@/assets/icons/IconArrowLeft.svg";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import LinkButton from "./LinkButton.astro";
-import { useTranslations } from "@/i18n";
+import { tplStr, useTranslations } from "@/i18n";
+import { getPaginationItems } from "@/utils/getPaginationItems";
 
 type Props = {
   page: Page<CollectionEntry<"posts">>;
 };
 
 const { page } = Astro.props;
-
 const t = useTranslations(Astro.currentLocale);
+
+const paginationItems = getPaginationItems(page.currentPage, page.lastPage);
+const firstPageUrl = (page.url.first ?? page.url.current).replace(/\/?$/, "/");
+const getPageUrl = (pageNumber: number) =>
+  pageNumber === 1 ? firstPageUrl : `${firstPageUrl}${pageNumber}/`;
 ---
 
 {
   page.lastPage > 1 && (
     <nav
-      class="mt-auto mb-8 flex justify-center gap-4"
+      class="app-layout mt-8 mb-10 flex items-center justify-center gap-1"
       role="navigation"
       aria-label="分页导航"
     >
       <LinkButton
         disabled={!page.url.prev}
         href={page.url.prev as string}
-        class:list={["select-none", { "opacity-50": !page.url.prev }]}
+        class:list={[
+          "border-border size-10 justify-center rounded border",
+          { "opacity-40": !page.url.prev },
+        ]}
         aria-label={t.a11y.goToPreviousPage}
       >
-        <IconArrowLeft class="inline-block rtl:rotate-180" />
-        {t.pagination.prev}
+        <IconArrowLeft class="size-5 rtl:rotate-180" />
       </LinkButton>
-      {page.currentPage} / {page.lastPage}
+
+      {paginationItems.map((item, index) =>
+        item === "ellipsis" ? (
+          <span
+            class="text-muted-foreground flex size-10 items-center justify-center"
+            aria-hidden="true"
+            data-key={`ellipsis-${index}`}
+          >
+            ...
+          </span>
+        ) : (
+          <a
+            href={getPageUrl(item)}
+            aria-current={item === page.currentPage ? "page" : undefined}
+            aria-label={tplStr(t.pagination.page, { page: item })}
+            class:list={[
+              "border-border flex size-10 items-center justify-center rounded border text-sm",
+              "hover:border-accent hover:text-accent",
+              {
+                "bg-accent text-accent-foreground border-accent":
+                  item === page.currentPage,
+              },
+            ]}
+          >
+            {item}
+          </a>
+        )
+      )}
+
       <LinkButton
         disabled={!page.url.next}
         href={page.url.next as string}
-        class:list={["select-none", { "opacity-50": !page.url.next }]}
+        class:list={[
+          "border-border size-10 justify-center rounded border",
+          { "opacity-40": !page.url.next },
+        ]}
         aria-label={t.a11y.goToNextPage}
       >
-        {t.pagination.next}
-        <IconArrowRight class="inline-block rtl:rotate-180" />
+        <IconArrowRight class="size-5 rtl:rotate-180" />
       </LinkButton>
     </nav>
   )
